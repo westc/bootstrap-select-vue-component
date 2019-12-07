@@ -1,1 +1,74 @@
-<script src="../main.js"></script>
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" />
+
+  <!-- jQuery -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <!-- Vue -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+  
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.11/css/bootstrap-select.min.css">
+
+  <script src="bootstrap-select-vue-component.js"></script>
+
+  <script src="main.js"></script>
+
+  <title>Bootstrap Select Vue Component</title>
+</head>
+
+<body>
+  <h1>Bootstrap Select Vue Component</h1>
+
+  <div id="vueApp" class="fluid-container mx-3">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <label class="input-group-text" for="selPeople">@</label>
+          </div>
+          <bootstrap-select v-model="value" 
+                            :options="options"
+                            :multiple="true"
+                            value-key="id"
+                            text-key="name"
+                            :null-text="nullText"
+                            :live-search="liveSearch"
+                            :actions-box="actionsBox"
+                            :show-subtext="showSubtext"
+                            subtext-key="sub"
+                            max-options="3"
+                            id="selPeople"
+                            ref="select">
+          </bootstrap-select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <label class="input-group-text" for="selPeople2">@</label>
+          </div>
+          <bootstrap-select id="selPeople2" :options="value" value="2" value-key="id" text-key="name">
+          </bootstrap-select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popper.js, then Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.11/js/bootstrap-select.min.js"></script>
+</body>
+
+</html>
