@@ -171,6 +171,7 @@
         var realOptions = this.realOptions;
         if (options.length != realOptions.length) {
           console.log({
+            outerHTML: this.$refs.select.outerHTML,
             options: [].slice.call(options).map(o => ({ html: o.innerHTML, value: o.value })),
             realOptions: JSON.parse(JSON.stringify(realOptions))
           });
