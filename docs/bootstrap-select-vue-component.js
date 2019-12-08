@@ -169,6 +169,12 @@
       changeSelect: function () {
         var options = this.$refs.select.options;
         var realOptions = this.realOptions;
+        if (options.length != realOptions.length) {
+          console.log({
+            options: options.map(o => ({ html: o.innerHTML, value: o.value })),
+            realOptions: JSON.parse(JSON.stringify(realOptions))
+          });
+        }
         var values = [];
         for (var i = 0, l = Math.min(options.length, realOptions.length); i < l; i++) {
           if (options[i].selected) {
