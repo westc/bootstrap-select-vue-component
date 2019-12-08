@@ -167,11 +167,12 @@
         jQuery(this.$refs.select).selectpicker('refresh');
       },
       changeSelect: function () {
-        var options = this.realOptions;
+        var options = this.$refs.select.options;
+        var realOptions = this.realOptions;
         var values = [];
-        for (var i = 0, l = options.length; i < l; i++) {
+        for (var i = 0, l = Math.min(options.length, realOptions.length); i < l; i++) {
           if (options[i].selected) {
-            values.push(options[i].value);
+            values.push(realOptions[i].value);
           }
         }
         this.$emit('input', values);
