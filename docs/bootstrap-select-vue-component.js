@@ -48,7 +48,20 @@
     'subtextKey',
     'id',
     'name'
-  ].concat(propMapping.map(function(a){return a.camelName}));
+  ].concat(propMapping.map(function(a){return a.camelName}))
+    .reduce(function(props, name) {
+      var prop = props[name] = {};
+      if (name === 'value') {
+        prop.validator = function(value) {
+          return value == undefined
+            ? []
+            : Array.isArray(value)
+              ? value.slice()
+              : [value];
+        };
+      }
+      return props;
+    }, {});
 
   var watch = {
     // NOTE:  This will be called twice whenever the value is set as a non-array.
@@ -99,15 +112,16 @@
   templateArray = [
     '<select',
     '  :multiple="multiple"',
-    '  v-on:change="changeSelect"',
+    '  @change="changeSelect"',
     '  :id="id"',
     '  :name="name"',
     '  class="form-control bsv-select"',
-    '  data-style=""'
+    '  data-style=""',
+    '  data-is-unrendered="true"'
   ].concat(templateArray).concat([
     '  ref="select"',
     '>',
-    '  <option v-for="option in realOptions" v-bind:value="option.value" :data-subtext="option.subtext" :selected="option.selected">{{ option.text }}</option>',
+    '  <option v-for="option in realOptions" is-real="1" :value="option.value" :data-subtext="option.subtext" :selected="option.selected">{{ option.text }}</option>',
     '</select>'
   ]);
   var template = templateArray.join('\n');
@@ -130,7 +144,7 @@
         var showSubtext = this.showSubtext;
         
         var values = this.value;
-        values = Array.isArray(values) ? values.slice() : [values];
+        values = values == undefined ? [] : Array.isArray(values) ? values.slice() : [values];
         
         var options = this.options;
         options = Array.isArray(options) ? options.slice() : [options];
@@ -160,28 +174,94 @@
     methods: {
       rerender: function () {
         var jElem = jQuery(this.$refs.select);
-        jElem.selectpicker('destroy');
+        if (jElem.data('is-unrendered')) {
+          jElem.data('is-unrendered', false);
+        }
+        else {
+          jElem.selectpicker('destroy');
+        }
         jElem.selectpicker();
       },
       refresh: function () {
         jQuery(this.$refs.select).selectpicker('refresh');
       },
-      changeSelect: function () {
-        var options = this.$refs.select.options;
-        var realOptions = this.realOptions;
-        if (options.length != realOptions.length) {
-          console.log({
-            outerHTML: this.$refs.select.outerHTML,
-            options: [].slice.call(options).map(o => ({ html: o.innerHTML, value: o.value })),
-            realOptions: JSON.parse(JSON.stringify(realOptions))
-          });
+      getSelectedIndices: function (values) {
+        if (arguments.length === 0) {
+          values = this.value;
+          values = values == undefined ? [] : Array.isArray(values) ? values.slice() : [values];
         }
+        else {
+          values = values === undefined
+            ? []
+            : Array.isArray(values)
+              ? values.slice()
+              : [values];
+        }
+        var indices = [];
+        var options = this.realOptions.slice();
+        for (var vi = 0, vc = values.length; vi < vc; vi++) {
+          var value = values[vi];
+          for (var oi = 0, oc = options.length; oi < oc; oi++) {
+            var option = options[oi];
+            var ov = option.value;
+            if (value !== value ? ov !== ov : value === ov) {
+              indices.push(oi + indices.length);
+              options.splice(oi, 1);
+              break;
+            }
+          }
+        }
+        return indices;
+      },
+      getSelectedValues: function (values) {
+        var options = this.realOptions;
+        return this.getSelectedIndices.apply(0, arguments).map(function(index) {
+          return options[index].value;
+        });
+      },
+      getOptionElements: function() {
+        // Get an array of the current OPTION elements in SELECT excluding any
+        // not made with the Vue template.
+        var options = this.$refs.select.options;
+        for (var arrOptions = [], i = options.length; i--; ) {
+          var option = options[i];
+          if (option.hasAttribute('is-real')) {
+            arrOptions.unshift(option);
+          }
+        }
+        return arrOptions;
+      },
+      getSelectedOptionElements: function() {
+        return this.getOptionElements().filter(function(option) {
+          return option.selected;
+        });
+      },
+      getSelectedOptionElementIndices: function() {
+        return this.getOptionElements().reduce(function(indices, option, index) {
+          if (option.selected) {
+            indices.push(index);
+          }
+          return indices;
+        }, []);
+      },
+      validate: function () {
+        this.$emit('input', this.getSelectedValues());
+      },
+      changeSelect: function () {
+        var arrOptions = this.getOptionElements();
+
+        // Real options computed by taking the values stored in `this.options`.
+        var realOptions = this.realOptions;
+
+        // Get the selected values
         var values = [];
-        for (var i = 0, l = Math.min(options.length, realOptions.length); i < l; i++) {
-          if (options[i].selected) {
+        for (var i = 0, l = arrOptions.length; i < l; i++) {
+          if (arrOptions[i].selected) {
             values.push(realOptions[i].value);
           }
         }
+
+        // Emit an input event with the newly selected values.
         this.$emit('input', values);
       }
     },

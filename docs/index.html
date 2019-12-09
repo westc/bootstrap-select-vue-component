@@ -13,7 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
   <!-- Vue -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
   
   <!-- Latest compiled and minified CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.11/css/bootstrap-select.min.css">
@@ -33,9 +33,9 @@
       <div class="col-md-6">
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <label class="input-group-text" for="selPeople">@</label>
+            <label class="input-group-text" for="selPeople">Select1</label>
           </div>
-          <bootstrap-select v-model="value" 
+          <bootstrap-select v-model="value1" 
                             :options="options"
                             :multiple="true"
                             value-key="id"
@@ -47,34 +47,36 @@
                             subtext-key="sub"
                             max-options="3"
                             id="selPeople"
-                            ref="select">
+                            ref="Select1">
           </bootstrap-select>
         </div>
       </div>
       <div class="col-md-6">
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <label class="input-group-text" for="selPeople2">@</label>
+            <label class="input-group-text" for="selPeople2">Select2</label>
           </div>
-          <bootstrap-select id="selPeople2" :options="value" value="2" value-key="id" text-key="name">
+          <bootstrap-select id="selPeople2"
+                            :options="value1"
+                            v-model="value2"
+                            value-key="id"
+                            text-key="name"
+                            ref="Select2">
           </bootstrap-select>
         </div>
       </div>
       <div class="col-md-6">
         <div class="input-group mb-3">
           <div class="input-group-prepend">
-            <label class="input-group-text" for="selPeople3">@</label>
+            <label class="input-group-text" for="selPeople3">Select3</label>
           </div>
-          <bootstrap-select id="selPeople3" :options="value" value="2" value-key="id" text-key="name" null-text="SELECT SOMETHING">
-          </bootstrap-select>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="input-group mb-3">
-          <div class="input-group-prepend">
-            <label class="input-group-text" for="selPeople4">4</label>
-          </div>
-          <bootstrap-select id="selPeople4" :options="[2,3,4,5]" value-key="id" text-key="name" null-text="SELECT SOMETHING">
+          <bootstrap-select id="selPeople3"
+                            :options="value1"
+                            v-model="value3"
+                            value-key="id"
+                            text-key="name"
+                            null-text="SELECT SOMETHING"
+                            ref="Select3">
           </bootstrap-select>
         </div>
       </div>
