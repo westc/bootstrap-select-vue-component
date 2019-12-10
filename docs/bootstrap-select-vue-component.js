@@ -48,20 +48,7 @@
     'subtextKey',
     'id',
     'name'
-  ].concat(propMapping.map(function(a){return a.camelName}))
-    .reduce(function(props, name) {
-      var prop = props[name] = {};
-      if (name === 'value') {
-        prop.validator = function(value) {
-          return value == undefined
-            ? []
-            : Array.isArray(value)
-              ? value.slice()
-              : [value];
-        };
-      }
-      return props;
-    }, {});
+  ].concat(propMapping.map(function(a){return a.camelName}));
 
   var watch = {
     // NOTE:  This will be called twice whenever the value is set as a non-array.
