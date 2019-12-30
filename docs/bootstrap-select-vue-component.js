@@ -103,7 +103,7 @@
     '  :id="id"',
     '  :name="name"',
     '  class="form-control bsv-select"',
-    '  data-style=""',
+    '  data-style="cool"',
     '  data-is-unrendered="true"'
   ].concat(templateArray).concat([
     '  ref="select"',
