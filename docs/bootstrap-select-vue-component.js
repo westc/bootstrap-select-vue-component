@@ -27,7 +27,7 @@
     'showSubtext',
     'showTick',
     'size',
-    'togglerClass',
+    'buttonClass',
     'tickIcon',
     'virtualScroll',
     'width',
@@ -104,7 +104,7 @@
     '  :id="id"',
     '  :name="name"',
     '  class="form-control bsv-select"',
-    '  :data-style="togglerClass"',
+    '  :data-style="buttonClassName"',
     '  data-is-unrendered="true"'
   ].concat(templateArray).concat([
     '  ref="select"',
@@ -125,6 +125,9 @@
     },
     watch: watch,
     computed: {
+      buttonClassName: function () {
+        return this.buttonClass || '';
+      },
       realOptions: function () {
         var valueKey = this.valueKey == undefined ? 'value' : this.valueKey;
         var textKey = this.textKey == undefined ? 'text' : this.textKey;
