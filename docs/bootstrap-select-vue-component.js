@@ -27,6 +27,7 @@
     'showSubtext',
     'showTick',
     'size',
+    'togglerClass',
     'tickIcon',
     'virtualScroll',
     'width',
@@ -103,7 +104,7 @@
     '  :id="id"',
     '  :name="name"',
     '  class="form-control bsv-select"',
-    '  data-style="cool"',
+    '  :data-style="togglerClass"',
     '  data-is-unrendered="true"'
   ].concat(templateArray).concat([
     '  ref="select"',
