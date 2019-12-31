@@ -1,4 +1,5 @@
 (function () {
+  var DEFAULT_TITLE = 'Select Something'
   var propMapping = [
     'actionsBox',
     'countSelectedText',
@@ -54,36 +55,7 @@
   var watch = {
     // NOTE:  This will be called twice whenever the value is set as a non-array.
     value: function (newValue) {
-      var values = Array.isArray(newValue) ? newValue.slice() : [newValue];
-      var options = this.realOptions.slice();
-      for (var value, valI = 0, valL = values.length; valI < valL; valI++) {
-        var value = values[valI];
-        for (var optI = 0, optL = options.length; optI < optL; optI++) {
-          var opt = options[optI];
-          if (value !== value ? opt.value !== opt.value : (value === opt.value)) {
-            options.splice(optI, 1);
-            break;
-          }
-        }
-        if (optI === optL) {
-          values.splice(valI, 1);
-        }
-      }
-
-      // Make sure to refresh this.value if necessary.
-      var propValue = this.value;
-      if (Array.isArray(propValue) && propValue.length === values.length) {
-        for (var i = propValue.length; i--;) {
-          var v = propValue[i];
-          if (propValue === propValue ? v !== values[i] : values[i] === values[i]) {
-            this.$emit('input', values);
-            break;
-          }
-        }
-      }
-      else if (this.value !== values) {
-        this.$emit('input', values);
-      }
+      this.$emit('input', this.validateValue(newValue));
     }
   };
 
@@ -95,12 +67,15 @@
   });
 
   var templateArray = propMapping.map(function(a) {
+    if (a.camelName === 'nullText') {
+      return '  :data-' + a.dashName + '="selectionCount?null:' + a.camelName + '"';
+    }
     return '  :data-' + a.dashName + '="' + a.camelName + '"';
   });
   templateArray = [
     '<select',
     '  :multiple="multiple"',
-    '  @change="changeSelect"',
+    '  @change="updateFromSelect"',
     '  :id="id"',
     '  :name="name"',
     '  class="form-control bsv-select"',
@@ -116,52 +91,16 @@
 
   Vue.component('bootstrap-select', {
     props: props,
-    mounted: function () {
+    mounted: function() {
       this.rerender();
-      this.changeSelect();
+
+      // Validate value on initialization.
+      this.$emit('input', this.validateValue());
     },
     updated: function () {
       this.refresh();
     },
     watch: watch,
-    computed: {
-      buttonClassName: function () {
-        return this.buttonClass || '';
-      },
-      realOptions: function () {
-        var valueKey = this.valueKey == undefined ? 'value' : this.valueKey;
-        var textKey = this.textKey == undefined ? 'text' : this.textKey;
-        var subtextKey = this.subtextKey == undefined ? 'subtext' : this.subtextKey;
-        var showSubtext = this.showSubtext;
-        
-        var values = this.value;
-        values = values == undefined ? [] : Array.isArray(values) ? values.slice() : [values];
-        
-        var options = this.options;
-        options = Array.isArray(options) ? options.slice() : [options];
-        
-        return options.map(function (value, index) {
-          var option;
-          if ('object' === typeof value && value != undefined) {
-            option = { value: value[valueKey], text: value[textKey], subtext: showSubtext ? value[subtextKey] : undefined };
-          }
-          else {
-            option = { value: value, text: value };
-          }
-
-          // Determine if this option is selected.
-          option.selected = false;
-          for (var i = 0, l = values.length; i < l; i++) {
-            value = values[i];
-            if (option.selected = value !== value ? option.value !== option.value : (option.value === value)) {
-              values.splice(i, 1);
-              break;
-            }
-          }
-          return option;
-        });
-      }
-    },
     methods: {
       rerender: function () {
         var jElem = jQuery(this.$refs.select);
@@ -174,86 +113,89 @@
         jElem.selectpicker();
       },
       refresh: function () {
-        jQuery(this.$refs.select).selectpicker('refresh');
+        var jSelect = jQuery(this.$refs.select);
+        if (!this.value.length) {
+          jSelect.selectpicker({ title: this.nullText || DEFAULT_TITLE });
+          jSelect.selectpicker('render');
+        }
+        jSelect.selectpicker('refresh');
       },
-      getSelectedIndices: function (values) {
+      validateValue: function(value) {
         if (arguments.length === 0) {
-          values = this.value;
-          values = values == undefined ? [] : Array.isArray(values) ? values.slice() : [values];
+          value = this.value;
         }
-        else {
-          values = values === undefined
-            ? []
-            : Array.isArray(values)
-              ? values.slice()
-              : [values];
-        }
-        var indices = [];
-        var options = this.realOptions.slice();
-        for (var vi = 0, vc = values.length; vi < vc; vi++) {
-          var value = values[vi];
-          for (var oi = 0, oc = options.length; oi < oc; oi++) {
-            var option = options[oi];
-            var ov = option.value;
-            if (value !== value ? ov !== ov : value === ov) {
-              indices.push(oi + indices.length);
-              options.splice(oi, 1);
-              break;
-            }
-          }
-        }
-        return indices;
+        return value == undefined ? [] : Array.isArray(value) ? value : [value];
       },
-      getSelectedValues: function (values) {
-        var options = this.realOptions;
-        return this.getSelectedIndices.apply(0, arguments).map(function(index) {
-          return options[index].value;
-        });
+      updateFromSelect: function () {
+        var indices = this.getSelectedOptionElementIndices();
+        var realOptions = this.realOptions;
+        this.$emit('input', indices.map(function(i) { return realOptions[i].value; }));
       },
       getOptionElements: function() {
-        // Get an array of the current OPTION elements in SELECT excluding any
-        // not made with the Vue template.
         var options = this.$refs.select.options;
-        for (var arrOptions = [], i = options.length; i--; ) {
-          var option = options[i];
-          if (option.hasAttribute('is-real')) {
-            arrOptions.unshift(option);
+        for (var option, arr = [], i = 0, l = options.length; i < l; i++) {
+          option = options[i];
+          if (option.getAttribute('is-real')) {
+            arr.push(option);
           }
         }
-        return arrOptions;
-      },
-      getSelectedOptionElements: function() {
-        return this.getOptionElements().filter(function(option) {
-          return option.selected;
-        });
+        return arr;
       },
       getSelectedOptionElementIndices: function() {
-        return this.getOptionElements().reduce(function(indices, option, index) {
-          if (option.selected) {
-            indices.push(index);
+        return this.getOptionElements().reduce(function(indices, o, i) {
+          if (o.selected) {
+            indices.push(i);
           }
           return indices;
         }, []);
+      }
+    },
+    computed: {
+      selectionCount: function () {
+        return this.validateValue().length;
       },
-      validate: function () {
-        this.$emit('input', this.getSelectedValues());
+      buttonClassName: function () {
+        return this.buttonClass || 'btn-bootstrap-select';
       },
-      changeSelect: function () {
-        var arrOptions = this.getOptionElements();
-
-        // Real options computed by taking the values stored in `this.options`.
-        var realOptions = this.realOptions;
-
-        // Get the selected values
-        var values = [];
-        for (var i = 0, l = arrOptions.length; i < l; i++) {
-          if (arrOptions[i].selected) {
-            values.push(realOptions[i].value);
+      optionsArray: function () {
+        var options = this.options;
+        return options == undefined ? [] : Array.isArray(options) ? options : [options];
+      },
+      realOptions: function () {
+        var valueKey = this.valueKey == undefined ? 'value' : this.valueKey;
+        var textKey = this.textKey == undefined ? 'text' : this.textKey;
+        var subtextKey = this.subtextKey == undefined ? 'subtext' : this.subtextKey;
+        var showSubtext = this.showSubtext;
+        
+        var values = this.validateValue().slice();
+        
+        return this.optionsArray.map(function (oldOption, index) {
+          var option;
+          if ('object' === typeof oldOption && oldOption != undefined) {
+            option = {
+              value: oldOption[valueKey],
+              text: oldOption[textKey],
+              subtext: showSubtext ? oldOption[subtextKey] : undefined
+            };
           }
-        }
+          else {
+            option = {
+              value: oldOption,
+              text: oldOption
+            };
+          }
 
-        // Emit an input event with the newly selected values.
-        this.$emit('input', values);
+          // Determine if this option is selected.
+          option.selected = false;
+          for (var i = 0, l = values.length; i < l; i++) {
+            var value = values[i];
+            if (option.selected = value !== value ? option.value !== option.value : (option.value === value)) {
+              values.splice(i, 1);
+              break;
+            }
+          }
+          return option;
+        });
       }
     },
     template: template

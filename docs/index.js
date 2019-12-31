@@ -10,7 +10,9 @@ $(function () {
       liveSearch: true,
       actionsBox: true,
       showSubtext: false,
-      list: ['hello', 'world']
+      list: ['hello', 'world'],
+      candidates: ["New", "Used"].map(x => ({value:x,text:x})),
+      candidate: "Used"
     }
   });
 });
