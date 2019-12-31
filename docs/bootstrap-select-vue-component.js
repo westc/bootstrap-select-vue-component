@@ -102,23 +102,33 @@
     },
     watch: watch,
     methods: {
+      removeExtraTitleElements: function() {
+        jQuery(this.$refs.select).find('.bs-title-option:gt(0)').remove();
+      },
       rerender: function () {
         var jElem = jQuery(this.$refs.select);
         if (jElem.data('is-unrendered')) {
           jElem.data('is-unrendered', false);
         }
         else {
+          this.removeExtraTitleElements();
           jElem.selectpicker('destroy');
         }
         jElem.selectpicker();
       },
       refresh: function () {
+        this.removeExtraTitleElements();
         var jSelect = jQuery(this.$refs.select);
+        var rendered = false;
         if (!this.value.length) {
           jSelect.selectpicker({ title: this.nullText || DEFAULT_TITLE });
-          jSelect.selectpicker('render');
+          if (rendered = !this.getTitleOptionElement()) {
+            jSelect.selectpicker('render');
+          }
         }
-        jSelect.selectpicker('refresh');
+        if (!rendered) {
+          jSelect.selectpicker('refresh');
+        }
       },
       validateValue: function(value) {
         if (arguments.length === 0) {
@@ -130,6 +140,16 @@
         var indices = this.getSelectedOptionElementIndices();
         var realOptions = this.realOptions;
         this.$emit('input', indices.map(function(i) { return realOptions[i].value; }));
+      },
+      getTitleOptionElement: function() {
+        var options = this.$refs.select.options;
+        for (var o, cls, i = 0, l = options.length; i < l; i++) {
+          o = options[i];
+          cls = o.className;
+          if (cls && /(^|\s)bs-title-option(\s|$)/.test(cls)) {
+            return o;
+          }
+        }
       },
       getOptionElements: function() {
         var options = this.$refs.select.options;
